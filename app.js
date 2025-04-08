@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -10,7 +11,6 @@ require('./passport/localStrategy')();
 require('./passport/kakaoStrategy')();
 const cookieParser = require('cookie-parser');
 const prefix = '/api-server';
-require('dotenv').config();
 
 const app = express();
 const { socketHandler } = require('./socket/index');
@@ -21,11 +21,13 @@ const setupSwagger = require('./swagger/swaggerConfig'); // Swagger 설정 불�
 socketHandler(server);
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'http://3.35.231.125'],
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(passport.initialize());
 app.use(express.json()); // JSON 요청을 받을 수 있도록 설정

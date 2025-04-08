@@ -1,4 +1,4 @@
-const { where } = require("sequelize");
+const { where } = require('sequelize');
 const {
   User,
   sequelize,
@@ -6,27 +6,27 @@ const {
   Favorite,
   Transaction,
   ItemImage,
-} = require("../model");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
+} = require('../model');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 const SALT = 10;
 const SECRET_KEY = process.env.SECRET_KEY;
 const KAKAO_ADMIN_KEY = process.env.KAKAO_ADMIN_KEY;
 const KAKAO_UNLINK_URL = process.env.KAKAO_UNLINK_URL;
-const axios = require("axios");
-require("dotenv").config();
+const axios = require('axios');
+require('dotenv').config();
 
 // 인증 번호 이메일 전송 함수
 const sendVerificationCode = async (email) => {
   try {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const token = jwt.sign({ email, code }, SECRET_KEY, {
-      expiresIn: "3m",
+      expiresIn: '3m',
     });
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: 'gmail',
       auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_PASSWORD,
@@ -36,7 +36,7 @@ const sendVerificationCode = async (email) => {
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: email,
-      subject: "dongnezio 이메일 인증번호",
+      subject: 'dongnezio 이메일 인증번호',
       html: `
         <p>안녕하세요! dongnezip을 방문해 주셔서 감사합니다!</p>
         <p>회원가입을 완료하려면 아래 인증번호를 입력해 주세요.</p>
@@ -49,7 +49,7 @@ const sendVerificationCode = async (email) => {
 
     return token; // 생성한 토큰 반환
   } catch (error) {
-    console.error("이메일 인증 코드 전송 실패:", error);
+    console.error('이메일 인증 코드 전송 실패:', error);
   }
 };
 
@@ -59,12 +59,12 @@ const sendVerificationCode = async (email) => {
 exports.token = async (req, res, next) => {
   const getUser = req.user || null;
   if (!getUser) {
-    return res.json({ message: "사용자를 찾을 수 없습니다." });
+    return res.json({ message: '사용자를 찾을 수 없습니다.' });
   }
   try {
     const user = await User.findOne({ where: { id: getUser.id } });
     if (!user) {
-      return res.status(400).json({ message: "사용자를 찾을 수 없습니다." });
+      return res.status(400).json({ message: '사용자를 찾을 수 없습니다.' });
     }
     return res.json({
       result: true,
@@ -73,9 +73,9 @@ exports.token = async (req, res, next) => {
       profileImg: user.profileImg,
     });
   } catch (error) {
-    console.error("user 정보 찾을 수 없음:", error);
+    console.error('user 정보 찾을 수 없음:', error);
     return res.status(500).json({
-      message: "user 정보를 찾을 수 없습니다!",
+      message: 'user 정보를 찾을 수 없습니다!',
     });
   }
 };
@@ -90,12 +90,12 @@ exports.sendCode = async (req, res, next) => {
 
     return res.json({
       result: true,
-      message: "이메일로 인증번호를 발송했습니다. 인증번호를 입력해주세요.",
+      message: '이메일로 인증번호를 발송했습니다. 인증번호를 입력해주세요.',
       token,
     });
   } catch (error) {
     return res.status(500).json({
-      message: "이메일 전송 중 오류가 발생했습니다. 나중에 다시 시도해주세요.",
+      message: '이메일 전송 중 오류가 발생했습니다. 나중에 다시 시도해주세요.',
     });
   }
 };
@@ -108,15 +108,15 @@ exports.verifyCode = (req, res, next) => {
 
     // 인증번호 비교
     if (decoded.code === code) {
-      return res.json({ result: true, message: "인증 성공!" });
+      return res.json({ result: true, message: '인증 성공!' });
     } else {
       return res.json({
-        message: "인증번호가 일치하지 않습니다. 다시 시도해주세요.",
+        message: '인증번호가 일치하지 않습니다. 다시 시도해주세요.',
       });
     }
   } catch (error) {
-    console.error("인증번호 검증 실패:", error);
-    return res.json({ message: "JWT 검증 실패 또는 만료된 토큰입니다." });
+    console.error('인증번호 검증 실패:', error);
+    return res.json({ message: 'JWT 검증 실패 또는 만료된 토큰입니다.' });
   }
 };
 
@@ -129,7 +129,7 @@ exports.findPw = async (req, res, next) => {
 
     if (decoded.code !== code) {
       return res.status(400).json({
-        message: "인증번호가 일치하지 않습니다. 다시 시도해주세요.",
+        message: '인증번호가 일치하지 않습니다. 다시 시도해주세요.',
       });
     }
 
@@ -141,18 +141,18 @@ exports.findPw = async (req, res, next) => {
 
       return res.json({
         result: true,
-        message: "비밀번호가 성공적으로 변경되었습니다.",
+        message: '비밀번호가 성공적으로 변경되었습니다.',
       });
     } else {
       return res
         .status(404)
-        .json({ message: "해당 이메일을 가진 사용자가 없습니다." });
+        .json({ message: '해당 이메일을 가진 사용자가 없습니다.' });
     }
   } catch (error) {
-    console.error("비밀번호 변경 처리 중 오류 발생:", error);
+    console.error('비밀번호 변경 처리 중 오류 발생:', error);
     return res.status(500).json({
       message:
-        "비밀번호 변경 중 오류가 발생했습니다. 나중에 다시 시도해주세요.",
+        '비밀번호 변경 중 오류가 발생했습니다. 나중에 다시 시도해주세요.',
     });
   }
 };
@@ -163,12 +163,12 @@ exports.join = async (req, res, next) => {
   try {
     const user = await User.findOne({ where: { email } });
     if (user) {
-      return res.json({ message: "이미 가입된 이메일입니다." });
+      return res.json({ message: '이미 가입된 이메일입니다.' });
     }
 
     const isNick = await User.findOne({ where: { nickname } });
     if (isNick) {
-      return res.json({ message: "이미 존재하는 닉네임입니다." });
+      return res.json({ message: '이미 존재하는 닉네임입니다.' });
     }
 
     const salt = await bcrypt.genSalt(SALT);
@@ -180,7 +180,7 @@ exports.join = async (req, res, next) => {
       password: hash,
     });
 
-    return res.json({ result: true, message: "회원가입 성공" });
+    return res.json({ result: true, message: '회원가입 성공' });
   } catch (error) {
     console.error(error);
     return next(error);
@@ -195,13 +195,13 @@ exports.checkId = async (req, res) => {
     const user = await User.findOne({ where: { email } });
 
     if (user) {
-      return res.json({ message: "이미 존재하는 아이디입니다." });
+      return res.json({ message: '이미 존재하는 아이디입니다.' });
     }
 
-    return res.json({ result: true, message: "사용 가능한 아이디입니다." });
+    return res.json({ result: true, message: '사용 가능한 아이디입니다.' });
   } catch (error) {
     console.error(error);
-    return res.json({ message: "서버 오류가 발생했습니다." });
+    return res.json({ message: '서버 오류가 발생했습니다.' });
   }
 };
 
@@ -211,12 +211,12 @@ exports.localLogin = async (req, res, next) => {
     const user = req.user;
 
     if (!user.email) {
-      return res.json({ message: "가입되지 않은 이메일입니다." });
+      return res.json({ message: '가입되지 않은 이메일입니다.' });
     }
 
     const result = await bcrypt.compare(req.body.password, user.password);
     if (!result) {
-      return res.json({ message: "비밀번호가 일치하지 않습니다." });
+      return res.json({ message: '비밀번호가 일치하지 않습니다.' });
     }
 
     // JWT 발급
@@ -225,7 +225,7 @@ exports.localLogin = async (req, res, next) => {
       { userId: user.id, email: user.email, provider: user.provider },
       SECRET_KEY,
       {
-        expiresIn: "7d",
+        expiresIn: '7d',
       }
     );
 
@@ -237,9 +237,9 @@ exports.localLogin = async (req, res, next) => {
     };
 
     // 쿠키에 JWT 저장
-    res.cookie("authToken", token, cookieOptions);
+    res.cookie('authToken', token, cookieOptions);
 
-    return res.json({ result: true, message: "로그인 성공", token, user });
+    return res.json({ result: true, message: '로그인 성공', token, user });
   } catch (error) {
     console.error(error);
     return next(error);
@@ -251,7 +251,7 @@ exports.kakaoLogin = async (req, res, next) => {
   const user = req.user;
   try {
     if (!user) {
-      return res.status(401).json({ message: "로그인 실패: 사용자 정보 없음" });
+      return res.status(401).json({ message: '로그인 실패: 사용자 정보 없음' });
     }
 
     // JWT 발급
@@ -263,7 +263,7 @@ exports.kakaoLogin = async (req, res, next) => {
       },
       SECRET_KEY,
       {
-        expiresIn: "7d",
+        expiresIn: '7d',
       }
     );
 
@@ -273,9 +273,9 @@ exports.kakaoLogin = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     };
 
-    res.cookie("authToken", token, cookieOptions);
+    res.cookie('authToken', token, cookieOptions);
 
-    res.redirect("http://localhost:3000");
+    res.redirect('http://3.35.231.125');
   } catch (error) {
     console.error(error);
     return next(error);
@@ -289,11 +289,11 @@ exports.logout = async (req, res, next) => {
     const provider = req.user?.provider;
 
     if (!userId || !provider) {
-      return res.status(401).json({ message: "로그인이 필요합니다." });
+      return res.status(401).json({ message: '로그인이 필요합니다.' });
     }
 
     // 1. 로컬 로그아웃 (JWT 토큰 삭제)
-    res.cookie("authToken", "", {
+    res.cookie('authToken', '', {
       httpOnly: true,
       secure: false,
       maxAge: 0, // 만료
@@ -302,7 +302,7 @@ exports.logout = async (req, res, next) => {
     let kakaoLogoutUrl = null;
 
     // 2. 카카오 로그아웃 (연결 끊기)
-    if (provider === "kakao") {
+    if (provider === 'kakao') {
       kakaoLogoutUrl = `https://kauth.kakao.com/oauth/logout?client_id=${
         process.env.KAKAO_ID
       }&logout_redirect_uri=${encodeURIComponent(process.env.FRONT_URI)}`;
@@ -310,11 +310,11 @@ exports.logout = async (req, res, next) => {
 
     return res.status(200).json({
       result: true,
-      message: "로그아웃되었습니다.",
+      message: '로그아웃되었습니다.',
       kakaoLogoutUrl,
     });
   } catch (error) {
-    console.error("로그아웃 오류:", error);
+    console.error('로그아웃 오류:', error);
     return next(error);
   }
 };
@@ -327,19 +327,19 @@ exports.changeInfo = async (req, res, next) => {
     const getUser = req.user || null;
 
     if (!getUser) {
-      return res.status(400).json({ message: "로그인 정보가 없습니다." });
+      return res.status(400).json({ message: '로그인 정보가 없습니다.' });
     }
 
     const user = await User.findOne({ where: { id: getUser.id } });
     if (!user) {
-      return res.json({ message: "사용자를 찾을 수 없습니다." });
+      return res.json({ message: '사용자를 찾을 수 없습니다.' });
     }
 
     // 비밀번호를 수정하려는 경우, 비밀번호 확인 과정 추가
     if (newPw) {
       const isMatch = await bcrypt.compare(oldPw, user.password);
       if (!isMatch) {
-        return res.json({ message: "현재 비밀번호가 일치하지 않습니다." });
+        return res.json({ message: '현재 비밀번호가 일치하지 않습니다.' });
       }
 
       const salt = await bcrypt.genSalt(SALT);
@@ -361,7 +361,7 @@ exports.changeInfo = async (req, res, next) => {
     await user.save();
     return res.json({
       result: true,
-      message: "회원 정보 수정 성공",
+      message: '회원 정보 수정 성공',
       user,
       profileImg: user.profileImg,
     });
@@ -379,26 +379,26 @@ exports.deleteUser = async (req, res) => {
     const name = req.user.name;
 
     if (!userId || !provider) {
-      return res.status(401).json({ message: "로그인이 필요합니다." });
+      return res.status(401).json({ message: '로그인이 필요합니다.' });
     }
 
-    if (provider === "kakao") {
+    if (provider === 'kakao') {
       await axios.post(
         KAKAO_UNLINK_URL,
         {
-          target_id_type: "user_id",
+          target_id_type: 'user_id',
           target_id: name,
         },
         {
           headers: {
             Authorization: `KakaoAK ${KAKAO_ADMIN_KEY}`,
-            "Content-Type": "application/x-www-form-urlencoded",
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
         }
       );
     }
 
-    res.cookie("authToken", "", {
+    res.cookie('authToken', '', {
       httpOnly: true,
       secure: false,
       maxAge: 0,
@@ -406,16 +406,16 @@ exports.deleteUser = async (req, res) => {
 
     await User.destroy({ where: { id: userId } });
 
-    res.clearCookie("jwt");
+    res.clearCookie('jwt');
 
     return res
       .status(200)
-      .json({ result: true, message: "회원 탈퇴가 완료되었습니다." });
+      .json({ result: true, message: '회원 탈퇴가 완료되었습니다.' });
   } catch (error) {
-    console.error("회원 탈퇴 오류:", error.response?.data || error.message);
+    console.error('회원 탈퇴 오류:', error.response?.data || error.message);
     return res
       .status(500)
-      .json({ message: "회원 탈퇴 실패", error: error.message });
+      .json({ message: '회원 탈퇴 실패', error: error.message });
   }
 };
 
@@ -427,13 +427,13 @@ exports.checkNick = async (req, res) => {
     const user = await User.findOne({ where: { nickname } });
 
     if (user) {
-      return res.json({ message: "이미 존재하는 닉네임입니다." });
+      return res.json({ message: '이미 존재하는 닉네임입니다.' });
     }
 
-    return res.json({ result: true, message: "사용 가능한 닉네임입니다." });
+    return res.json({ result: true, message: '사용 가능한 닉네임입니다.' });
   } catch (error) {
     console.error(error);
-    return res.json({ message: "서버 오류가 발생했습니다." });
+    return res.json({ message: '서버 오류가 발생했습니다.' });
   }
 };
 
@@ -443,13 +443,13 @@ exports.mypage = async (req, res) => {
   try {
     const getUser = req.user || null;
     if (!getUser) {
-      return res.status(400).json({ message: "로그인 정보가 없습니다." });
+      return res.status(400).json({ message: '로그인 정보가 없습니다.' });
     }
 
     const user = await User.findOne({ where: { id: getUser.id } });
 
     if (!user) {
-      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
     }
 
     // 판매한 상품 조회
@@ -458,11 +458,11 @@ exports.mypage = async (req, res) => {
       include: [
         {
           model: Item,
-          attributes: ["id", "title", "price"],
+          attributes: ['id', 'title', 'price'],
           include: [
             {
               model: ItemImage,
-              attributes: ["imageUrl"],
+              attributes: ['imageUrl'],
             },
           ],
         },
@@ -475,11 +475,11 @@ exports.mypage = async (req, res) => {
       include: [
         {
           model: Item,
-          attributes: ["id", "title", "price"],
+          attributes: ['id', 'title', 'price'],
           include: [
             {
               model: ItemImage,
-              attributes: ["imageUrl"],
+              attributes: ['imageUrl'],
             },
           ],
         },
@@ -492,11 +492,11 @@ exports.mypage = async (req, res) => {
       include: [
         {
           model: Item,
-          attributes: ["id", "title", "price"],
+          attributes: ['id', 'title', 'price'],
           include: [
             {
               model: ItemImage,
-              attributes: ["imageUrl"],
+              attributes: ['imageUrl'],
             },
           ],
         },
@@ -506,7 +506,7 @@ exports.mypage = async (req, res) => {
     // 프론트로 보낼 데이터 가공
     return res.status(200).json({
       result: true,
-      message: "마이페이지 정보 조회 성공",
+      message: '마이페이지 정보 조회 성공',
       soldItems: soldItems.map((t) => ({
         id: t.Item.id,
         title: t.Item.title,
@@ -531,7 +531,7 @@ exports.mypage = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    return res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
 
@@ -545,13 +545,13 @@ exports.soldItems = async (req, res) => {
   try {
     const getUser = req.user || null;
     if (!getUser) {
-      return res.status(400).json({ message: "로그인 정보가 없습니다." });
+      return res.status(400).json({ message: '로그인 정보가 없습니다.' });
     }
 
     const user = await User.findOne({ where: { id: getUser.id } });
 
     if (!user) {
-      return res.json({ message: "사용자를 찾을 수 없습니다." });
+      return res.json({ message: '사용자를 찾을 수 없습니다.' });
     }
 
     const { rows, count } = await Transaction.findAndCountAll({
@@ -559,11 +559,11 @@ exports.soldItems = async (req, res) => {
       include: [
         {
           model: Item,
-          attributes: ["id", "title", "price"],
+          attributes: ['id', 'title', 'price'],
           include: [
             {
               model: ItemImage,
-              attributes: ["imageUrl"],
+              attributes: ['imageUrl'],
               required: false,
               limit: 1,
             },
@@ -578,7 +578,7 @@ exports.soldItems = async (req, res) => {
 
     if (rows.length === 0 && page > totalPages) {
       return res.json({
-        message: "더 이상 아이템이 없습니다.",
+        message: '더 이상 아이템이 없습니다.',
         items: [],
         currentPage: page,
         totalPages,
@@ -601,7 +601,7 @@ exports.soldItems = async (req, res) => {
                   : null,
             };
           } else {
-            console.warn("item is undefined", item);
+            console.warn('item is undefined', item);
             return null;
           }
         })
@@ -613,7 +613,7 @@ exports.soldItems = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    return res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
 
@@ -626,13 +626,13 @@ exports.boughtItems = async (req, res) => {
   try {
     const getUser = req.user || null;
     if (!getUser) {
-      return res.status(400).json({ message: "로그인 정보가 없습니다." });
+      return res.status(400).json({ message: '로그인 정보가 없습니다.' });
     }
 
     const user = await User.findOne({ where: { id: getUser.id } });
 
     if (!user) {
-      return res.json({ message: "사용자를 찾을 수 없습니다." });
+      return res.json({ message: '사용자를 찾을 수 없습니다.' });
     }
 
     const { rows, count } = await Transaction.findAndCountAll({
@@ -643,13 +643,13 @@ exports.boughtItems = async (req, res) => {
         {
           model: Item,
           // as: "item",
-          attributes: ["id", "title", "price"],
+          attributes: ['id', 'title', 'price'],
           include: [
             {
               model: ItemImage,
               // as: "images",
               required: false,
-              attributes: ["imageUrl"],
+              attributes: ['imageUrl'],
             },
           ],
         },
@@ -662,7 +662,7 @@ exports.boughtItems = async (req, res) => {
 
     if (rows.length === 0 && page > totalPages) {
       return res.json({
-        message: "더 이상 아이템이 없습니다.",
+        message: '더 이상 아이템이 없습니다.',
         items: [],
         currentPage: page,
         totalPages: totalPages,
@@ -685,7 +685,7 @@ exports.boughtItems = async (req, res) => {
                   : null,
             };
           } else {
-            console.warn("item is undefined", item);
+            console.warn('item is undefined', item);
             return null;
           }
         })
@@ -696,7 +696,7 @@ exports.boughtItems = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    return res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
 
@@ -708,13 +708,13 @@ exports.LikeItems = async (req, res) => {
   try {
     const getUser = req.user || null;
     if (!getUser) {
-      return res.status(400).json({ message: "로그인 정보가 없습니다." });
+      return res.status(400).json({ message: '로그인 정보가 없습니다.' });
     }
 
     const user = await User.findOne({ where: { id: getUser.id } });
 
     if (!user) {
-      return res.json({ message: "사용자를 찾을 수 없습니다." });
+      return res.json({ message: '사용자를 찾을 수 없습니다.' });
     }
 
     const { rows, count } = await Favorite.findAndCountAll({
@@ -725,13 +725,13 @@ exports.LikeItems = async (req, res) => {
         {
           model: Item,
           // as: "item",
-          attributes: ["id", "title", "price"],
+          attributes: ['id', 'title', 'price'],
           include: [
             {
               model: ItemImage,
               // as: "images",
               required: false,
-              attributes: ["imageUrl"],
+              attributes: ['imageUrl'],
             },
           ],
         },
@@ -744,7 +744,7 @@ exports.LikeItems = async (req, res) => {
 
     if (rows.length === 0 && page > totalPages) {
       return res.json({
-        message: "더 이상 아이템이 없습니다.",
+        message: '더 이상 아이템이 없습니다.',
         items: [],
         currentPage: page,
         totalPages: totalPages,
@@ -767,7 +767,7 @@ exports.LikeItems = async (req, res) => {
                   : null,
             };
           } else {
-            console.warn("item is undefined", item);
+            console.warn('item is undefined', item);
             return null;
           }
         })
@@ -778,6 +778,6 @@ exports.LikeItems = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다." });
+    return res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
